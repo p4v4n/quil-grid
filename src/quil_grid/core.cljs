@@ -1,14 +1,14 @@
 (ns quil-grid.core
   (:require [quil.core :as q :include-macros true]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [quil-grid.conway :as conway]))
 
-(def m 100)          ;;no: of rows
-(def n 100)          ;;no: of columns
-(def width 800)
+(def m 50)          ;;no: of rows
+(def n 50)          ;;no: of columns
+(def width 600)
 (def height 600)
+(def default-color 100)
 
-(defn generate-random-color []
-  (rand-int 256))
 ;;---------------------------
 (defn generate-single-rect [c x y i j]
   {:color c
@@ -16,7 +16,7 @@
    :index {:i i :j j}})
 
 (defn generate-single-row [y n i]
-  (mapv #(generate-single-rect 100
+  (mapv #(generate-single-rect (conway/choose-color)
                                (* (/  width n) %) y
                                i  %)
         (range n)))
@@ -27,26 +27,26 @@
 (defn setup []
   (q/frame-rate 5)
   (q/no-stroke)
-  (q/color-mode :hsb)
+  ;;(q/color-mode :hsb)
   (generate-initial-state m n))
 ;;-----------------------------------
-(defn update-color [color]
-  (mod (+ color (rand-int 10)) 256))
+;; (defn update-color [color]
+;;   color)
 
-(defn update-single-rect [s-state]
-  (update s-state :color update-color))
+;; (defn update-single-rect [s-state]
+;;   (update s-state :color update-color))
 
-(defn update-single-row [s-row]
-  (mapv update-single-rect s-row))
+;; (defn update-single-row [s-row]
+;;   (mapv update-single-rect s-row))
 
-(defn update-whole-grid [state]
-  (mapv update-single-row state))
+;; (defn update-whole-grid [state]
+;;   (mapv update-single-row state))
 ;;-------------------
 (defn update-state [state]
-  (update-whole-grid state))
+  (conway/conway-transform state))
 ;;--------------------------------------------
 (defn draw-single-rect [s-state]
-  (q/fill (:color s-state) 255 255)
+  (apply q/fill (:color s-state))
   (q/rect (get-in s-state [:loc :x]) (get-in s-state [:loc :y]) (/ width n) (/ height m)))
 
 (defn draw-single-row [s-row]
